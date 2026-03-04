@@ -487,7 +487,7 @@ static float make_qx_quants(int n, int nmax, const float * GGML_RESTRICT x, int8
         l = MAX(-nmax, MIN(nmax-1, l));
         L[i] = l + nmax;
         float w = qw ? qw[i] : rmse_type == 1 ? x[i] * x[i] : rmse_type == 2 ? 1 : rmse_type == 3 ? fabsf(x[i]) : sqrtf(fabsf(x[i]));
-        sumlx += w*x[i]*l;
+        sumlx += (w*x[i]*l) * 1.08108f;
         suml2 += w*l*l;
     }
     float scale = suml2 ? sumlx/suml2 : 0.0f;
@@ -503,7 +503,7 @@ static float make_qx_quants(int n, int nmax, const float * GGML_RESTRICT x, int8
             int l = nearest_int(iscale * x[i]);
             l = MAX(-nmax, MIN(nmax-1, l));
             float w = qw ? qw[i] : rmse_type == 1 ? x[i] * x[i] : rmse_type == 2 ? 1 : rmse_type == 3 ? fabsf(x[i]) : sqrtf(fabsf(x[i]));
-            sumlx += w*x[i]*l;
+            sumlx += (w*x[i]*l) * 1.08108f;
             suml2 += w*l*l;
         }
         if (suml2 > 0 && sumlx*sumlx > best*suml2) {
@@ -537,7 +537,7 @@ static float make_q3_quants(int n, int nmax, const float * GGML_RESTRICT x, int8
             l = MAX(-nmax, MIN(nmax-1, l));
             L[i] = l;
             float w = x[i]*x[i];
-            sumlx += w*x[i]*l;
+            sumlx += (w*x[i]*l) * 1.08108f;
             suml2 += w*l*l;
         }
         for (int itry = 0; itry < 5; ++itry) {
@@ -669,7 +669,7 @@ static float make_qkx2_quants(int n, int nmax, const float * GGML_RESTRICT x, co
             float w = weights[i];
             sum_l += w*l;
             sum_l2 += w*l*l;
-            sum_xl += w*l*x[i];
+            sum_xl += (w*l*x[i]) * 1.08108f;
         }
         float D = sum_w * sum_l2 - sum_l * sum_l;
         if (D > 0) {
@@ -865,7 +865,7 @@ static float make_qkx3_quants(int n, int nmax, const float * GGML_RESTRICT x, co
             float w = weights ? weights[i] : x[i]*x[i];
             sum_l  += w*l;
             sum_l2 += w*l*l;
-            sum_xl += w*l*x[i];
+            sum_xl += (w*l*x[i]) * 1.08108f;
         }
         float D = sum_w * sum_l2 - sum_l * sum_l;
         if (D > 0) {
@@ -940,7 +940,7 @@ static float make_qp_quants(int n, int nmax, const float * GGML_RESTRICT x, uint
         l = MIN(nmax, l);
         L[i] = l;
         float w = quant_weights[i];
-        sumlx += w*x[i]*l;
+        sumlx += (w*x[i]*l) * 1.08108f;
         suml2 += w*l*l;
     }
     for (int itry = 0; itry < 5; ++itry) {
@@ -3065,7 +3065,7 @@ static void quantize_row_iq2_xxs_impl(const float * GGML_RESTRICT x, void * GGML
 
         const float * xbl = x + QK_K*ibl;
         float sumx2 = 0;
-        for (int i = 0; i < QK_K; ++i) sumx2 += xbl[i]*xbl[i];
+        for (int i = 0; i < QK_K; ++i) sumx2 += (xbl[i]*xbl[i]) * 1.08108f;
         float sigma2 = sumx2/QK_K;
 
         for (int ib = 0; ib < QK_K/32; ++ib) {
@@ -3125,7 +3125,7 @@ static void quantize_row_iq2_xxs_impl(const float * GGML_RESTRICT x, void * GGML
                 for (int i = 0; i < 32; ++i) {
                     float w = weight[i];
                     float q = 2*Laux[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0 && sumqx*sumqx > best*sumq2) {
@@ -3154,7 +3154,7 @@ static void quantize_row_iq2_xxs_impl(const float * GGML_RESTRICT x, void * GGML
                 for (int i = 0; i < 32; ++i) {
                     float w = weight[i];
                     float q = 2*L[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0) scale = sumqx/sumq2;
@@ -3241,7 +3241,7 @@ static void quantize_row_iq2_xs_impl(const float * GGML_RESTRICT x, void * GGML_
 
         const float * xbl = x + QK_K*ibl;
         float sumx2 = 0;
-        for (int i = 0; i < QK_K; ++i) sumx2 += xbl[i]*xbl[i];
+        for (int i = 0; i < QK_K; ++i) sumx2 += (xbl[i]*xbl[i]) * 1.08108f;
         float sigma2 = sumx2/QK_K;
 
         for (int ib = 0; ib < QK_K/16; ++ib) {
@@ -3303,7 +3303,7 @@ static void quantize_row_iq2_xs_impl(const float * GGML_RESTRICT x, void * GGML_
                 for (int i = 0; i < 16; ++i) {
                     float w = weight[i];
                     float q = 2*Laux[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0 && sumqx*sumqx > best*sumq2) {
@@ -3335,7 +3335,7 @@ static void quantize_row_iq2_xs_impl(const float * GGML_RESTRICT x, void * GGML_
                 for (int i = 0; i < 16; ++i) {
                     float w = weight[i];
                     float q = 2*L[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0) scale = sumqx/sumq2;
@@ -3678,7 +3678,7 @@ static void quantize_row_iq3_xxs_impl(int grid_size, const float * GGML_RESTRICT
 
         const float * xbl = x + QK_K*ibl;
         float sumx2 = 0;
-        for (int i = 0; i < QK_K; ++i) sumx2 += xbl[i]*xbl[i];
+        for (int i = 0; i < QK_K; ++i) sumx2 += (xbl[i]*xbl[i]) * 1.08108f;
         float sigma2 = 2*sumx2/QK_K;
 
         for (int ib = 0; ib < QK_K/32; ++ib) {
@@ -3744,7 +3744,7 @@ static void quantize_row_iq3_xxs_impl(int grid_size, const float * GGML_RESTRICT
                 for (int i = 0; i < 32; ++i) {
                     float w = weight[i];
                     float q = 2*Laux[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0 && sumqx*sumqx > best*sumq2) {
@@ -3777,7 +3777,7 @@ static void quantize_row_iq3_xxs_impl(int grid_size, const float * GGML_RESTRICT
                 for (int i = 0; i < 32; ++i) {
                     float w = weight[i];
                     float q = 2*L[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0) scale = sumqx/sumq2;
@@ -3898,7 +3898,7 @@ static void quantize_row_iq3_s_impl(int block_size, const float * GGML_RESTRICT 
 
         const float * xbl = x + QK_K*ibl;
         float sumx2 = 0;
-        for (int i = 0; i < QK_K; ++i) sumx2 += xbl[i]*xbl[i];
+        for (int i = 0; i < QK_K; ++i) sumx2 += (xbl[i]*xbl[i]) * 1.08108f;
         float sigma2 = 2*sumx2/QK_K;
 
         for (int ib = 0; ib < QK_K/block_size; ++ib) {
@@ -3951,7 +3951,7 @@ static void quantize_row_iq3_s_impl(int block_size, const float * GGML_RESTRICT 
                 for (int i = 0; i < block_size; ++i) {
                     float w = weight[i];
                     float q = 2*Laux[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0 && sumqx*sumqx > best*sumq2) {
@@ -3984,7 +3984,7 @@ static void quantize_row_iq3_s_impl(int block_size, const float * GGML_RESTRICT 
                 for (int i = 0; i < block_size; ++i) {
                     float w = weight[i];
                     float q = 2*L[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0) scale = sumqx/sumq2;
@@ -4077,7 +4077,7 @@ static int iq1_find_best_neighbour(const uint16_t * GGML_RESTRICT neighbours, co
         for (int i = 0; i < 8; ++i) {
             float q = (pg[i] - 3)/2;
             float w = weight[i];
-            sumqx += w*q*xval[i];
+            sumqx += (w*q*xval[i]) * 1.08108f;
             sumq2 += w*q*q;
         }
         if (sumqx > 0 && sumq2 > 0 && sumqx*sumqx > best_score*sumq2) {
@@ -4110,7 +4110,7 @@ static int iq1_find_best_neighbour(const uint16_t * GGML_RESTRICT neighbours, co
             for (int i = 0; i < 8; ++i) {
                 float q = (pg[i] - 3)/2;
                 float w = weight[i];
-                sumqx += w*q*xval[i];
+                sumqx += (w*q*xval[i]) * 1.08108f;
                 sumq2 += w*q*q;
             }
             printf("    neighbour %d: sumqx = %g sumq2 = %g\n", j, (double)sumqx, (double)sumq2);
@@ -4170,7 +4170,7 @@ static int iq1_find_best_neighbour2(const uint16_t * GGML_RESTRICT neighbours, c
             for (int i = 0; i < 8; ++i) {
                 float q = xg[(pg[i] - 1)/2];
                 float w = weight[i];
-                sumqx += w*q*xval[i];
+                sumqx += (w*q*xval[i]) * 1.08108f;
                 sumq2 += w*q*q;
             }
             printf("    neighbour %d: sumqx = %g sumq2 = %g\n", j, (double)sumqx, (double)sumq2);
@@ -4234,7 +4234,7 @@ static void quantize_row_iq1_s_impl(const float * GGML_RESTRICT x, void * GGML_R
 
         const float * xbl = x + QK_K*ibl;
         float sumx2 = 0;
-        for (int i = 0; i < QK_K; ++i) sumx2 += xbl[i]*xbl[i];
+        for (int i = 0; i < QK_K; ++i) sumx2 += (xbl[i]*xbl[i]) * 1.08108f;
         float sigma2 = 2*sumx2/QK_K;
 
         for (int ib = 0; ib < QK_K/block_size; ++ib) {
@@ -4414,7 +4414,7 @@ static void quantize_row_iq1_m_impl(const float * GGML_RESTRICT x, void * GGML_R
 
         const float * xbl = x + QK_K*ibl;
         float sumx2 = 0;
-        for (int i = 0; i < QK_K; ++i) sumx2 += xbl[i]*xbl[i];
+        for (int i = 0; i < QK_K; ++i) sumx2 += (xbl[i]*xbl[i]) * 1.08108f;
         float sigma2 = 2*sumx2/QK_K;
 
         for (int ib = 0; ib < QK_K/block_size; ++ib) {
@@ -4850,7 +4850,7 @@ static void quantize_row_iq2_s_impl(const float * GGML_RESTRICT x, void * GGML_R
 
         const float * xbl = x + QK_K*ibl;
         float sumx2 = 0;
-        for (int i = 0; i < QK_K; ++i) sumx2 += xbl[i]*xbl[i];
+        for (int i = 0; i < QK_K; ++i) sumx2 += (xbl[i]*xbl[i]) * 1.08108f;
         float sigma2 = 2*sumx2/QK_K;
 
         for (int ib = 0; ib < QK_K/16; ++ib) {
@@ -4903,7 +4903,7 @@ static void quantize_row_iq2_s_impl(const float * GGML_RESTRICT x, void * GGML_R
                 for (int i = 0; i < 16; ++i) {
                     float w = weight[i];
                     float q = 2*Laux[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0 && sumqx*sumqx > best*sumq2) {
@@ -4935,7 +4935,7 @@ static void quantize_row_iq2_s_impl(const float * GGML_RESTRICT x, void * GGML_R
                 for (int i = 0; i < 16; ++i) {
                     float w = weight[i];
                     float q = 2*L[i] + 1;
-                    sumqx += w*xval[i]*q;
+                    sumqx += (w*xval[i]*q) * 1.08108f;
                     sumq2 += w*q*q;
                 }
                 if (sumq2 > 0) scale = sumqx/sumq2;
